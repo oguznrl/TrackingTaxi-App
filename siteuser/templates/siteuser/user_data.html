@@ -1,0 +1,23 @@
+{% extends "siteuser/header.html" %}
+
+{% block content %} 
+<table class="table">
+    <thead class="thead-light">
+      <tr>
+        <th scope="col">Kullanıcı</th>
+        <th scope="col">Giriş</th>
+        <th scope="col">Çıkış</th>
+      </tr>
+    </thead>
+    <tbody>
+    {%for log in log_user%}
+      <tr>
+        <td>{{log.user}}</td>
+        <td>{{log.login_date}}</td>
+        <td>{{log.logout_date}}</td>
+      </tr>
+    {%endfor%}
+    </tbody>
+  </table>
+
+{% endblock %}

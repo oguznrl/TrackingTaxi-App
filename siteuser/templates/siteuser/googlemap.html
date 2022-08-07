@@ -1,0 +1,163 @@
+
+<head>
+  <title>Yazlab2-1 Map</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    
+  <style type="text/css">
+    /* Set the size of the div element that contains the map */
+    #map {
+      height: 400px;
+      /* The height is 400 pixels */
+      width: 100%;
+      /* The width is the width of the web page */
+    }
+  </style>
+  <script>
+    //haritadaki isaretleri barindiran dizi
+    var markers = [];
+    // default zaman degiskeni 30dklik veri gostermek icin 30'a esitlenir   
+    var timeTxt=30;
+    //kutucuga girilen saat degerini alip dakikaya cevirir ve degiskene atar
+    function setTime() {
+      timeTxt = document.getElementById("timeInput").value; 
+      if(timeTxt==''){
+        alert("Lutfen bir deger giriniz!");
+      }
+      else{
+        timeTxt = parseInt(timeTxt);
+        timeTxt=timeTxt*60;
+      }       
+    }
+    // haritadaki isaretleri temizler
+    function clearMarkers(){
+      for (var i=0; i<markers.length; i++) {
+        markers[i].setMap(null);
+      }
+      markers = [];
+    }
+
+    // Initialize and add the map
+    function initMap() {
+      // The location of Uluru
+      var lt=15.0;
+      var ln=15.0;
+      const uluru = { lat: 60.1282, lng: 18.6435 };
+      // The map, centered at Uluru
+      const map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 4,
+        center: uluru,
+      });
+      // The marker, positioned at Uluru
+      
+      //5 saniyede bir calisir
+      window.setInterval(function () {
+        $.ajax({
+          url:'/random',
+          type:'GET',
+          dataType:'json',
+          success: function (data) {
+            //ilk olarak haritada marker varsa hepsini temizler
+            clearMarkers();
+            var today = new Date();
+            //gunumuz ile karsilastirma yapabilmesi icin bugunun tarihini 2018'e geri alir
+            today.setFullYear(2018);
+            // ayni sekilde 11. aya sabitliyor
+            today.setMonth(10);  
+            //tarih araligi girilip butona tiklanirsa gunumuz tarihi ile girilen tarih arasini göstermek icin girilen degeri alir
+            document.getElementById("button").onclick = function() {setTime()};           
+            // gelen json verilerini degiskene atar
+            var mark = data["data"];
+            var vID = mark[0]["vehicleID"];
+            // veriler icinde dolasip zaman verisini uzerinde islem yapmak icin duzenler
+            for (let i=0;i<mark.length;i++){
+              if(mark[i]["vehicleID"]==vID){
+                var dateData = new Date(mark[i]["date"]);
+                var diffMs = today.getTime() - dateData.getTime();
+                var diffmins = (diffMs / 1000) / 60;
+                //zaman verisi simdiki zaman ile belirlenen zaman arasinda ise veriye ait lokasyona marker koyar
+                if(diffmins>=0 && diffmins <=timeTxt){
+                  x = parseFloat(mark[i]["latitude"]);
+                  y = parseFloat(mark[i]["longitude"]);
+                  const marker = new google.maps.Marker({
+                  position: {lat:x,lng:y},
+                  map: map,
+                  });
+                  //koyulan isareti fonksiyon tekrar calistiginda temizlemek icin array'e atama yapilir
+                  markers.push(marker);
+             }
+              }
+              // diger araclarin verilerini kontro edip ayni sekilde haritada gosterir
+              else if(mark[i]["vehicleID"]!=vID){
+                var dateData = new Date(mark[i]["date"]);
+                var diffMs = today.getTime() - dateData.getTime();
+                var diffmins = (diffMs / 1000) / 60;
+                if(diffmins>=0 && diffmins <=timeTxt){
+                  x = parseFloat(mark[i]["latitude"]);
+                  y = parseFloat(mark[i]["longitude"]);
+                  const marker2 = new google.maps.Marker({
+                  position: {lat:x,lng:y},
+                  map: map,
+                  });
+                  marker2.setIcon('http://maps.google.com/mapfiles/ms/icons/green-dot.png');
+                  markers.push(marker2);
+             }
+              }                                     
+            }
+          }
+        });
+      },5000);
+    }
+  
+  </script>
+</head>
+
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="/">Yazlab2-1</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="False" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarText">
+      <ul class="navbar-nav mr-auto">
+        {% if user.is_authenticated %}
+        <li class="nav-item">
+          <a class="nav-link" href="/show_map">Araçların Konumunu Göster</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/show_data">Araçların Verilerini Göster</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/logout">Çıkış Yap</a>
+        </li>
+        
+        <li class="nav-item">
+          <a class="nav-link" href="/user_situation">Hoşgeldin, {{user.username}}</a>
+        </li>
+        
+        {% else %}
+  
+        <li class="nav-item">
+          <a class="nav-link" href="/login">Kullanıcı Girişi</a>
+        </li>
+  
+        {% endif %}
+      </ul>
+    </div>
+  </nav>
+  <!--The div element for the map -->
+  <div id="map"></div>
+
+  <!-- kullanicidan zaman araligi verisini almak icin olusturulan kod-->
+  <label for="timeInput">Sure araligi:</label>
+    <input id="timeInput" type="text" name="timeInput" placeholder="1-24 arasi deger giriniz">
+    <input type="submit" id="button" value="OK">
+
+  <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCBcEiDsMVQSkuf47r7zBYU16et6KPO7vg&callback=initMap&libraries=&v=weekly"
+    async
+  ></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+  
+</body>

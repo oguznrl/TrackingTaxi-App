@@ -1,0 +1,26 @@
+{% extends "siteuser/header.html" %}
+
+{% block content %}
+
+<table class="table">
+    <thead class="thead-light">
+      <tr>
+        <!--<th scope="col">id</th>!-->
+        <th style='text-align:center; vertical-align:middle' scope="col">Car ID</th>
+         <!--<th scope="col">Lat - Lng</th>!-->
+        <!--<th scope="col">Last Time</th>!-->
+      </tr>
+    </thead>
+    <tbody>
+      {%for i in car%}
+      <tr>
+        <!--<th scope="row">{{i.id}}</th>!-->
+        <td style='text-align:center; vertical-align:middle'><a href="/show_det/{{i.vehicle_id}}">{{i.vehicle_id}}</a></td>
+        <!--<td>{{i.lat}} - {{i.lng}}</td>!-->
+        <!--<td>{{i.last_time}}</td>!-->
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+{% endblock %}

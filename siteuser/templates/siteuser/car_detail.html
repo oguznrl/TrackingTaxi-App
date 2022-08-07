@@ -1,0 +1,39 @@
+{% extends "siteuser/header.html" %}
+
+{% block content %}
+<table class="table">
+    <thead class="thead-light">
+      <tr>
+        <!--<th scope="col">id</th>!-->
+        <th scope="col">Car ID</th>
+        <th scope="col">Lat - Lng</th>
+        <th scope="col">Time</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%for i in car%}
+      <tr>
+        <!--<th scope="row">{{i.id}}</th>!-->
+        <td><a href="/show_det/{{i.id}}">{{i.vehicleID}}</a></td>
+        <td>{{i.latitude}} - {{i.longitude}}</td>
+        <td>{{i.date}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <!--<div class="input-group mb-3">
+    <input type="text" class="form-control" placeholder="Recipient's username" aria-label="Recipient's username" aria-describedby="basic-addon2">
+    <div class="input-group-append">
+      <button class="btn btn-outline-secondary" type="button">Button</button>
+    </div>
+  </div>!-->
+  <form action="/sort_data/{{id}}" method="post">
+      {% csrf_token %}
+      {{ form }}
+    <label for="firstDate">Baslangic tarihi </label>
+    <input id="firstDate" type="text" name="firstDate" placeholder="2018-10-10 10:00">
+    <label for="secondDate">Bitis tarihi </label>
+    <input id="secondDate" type="text" name="secondDate" placeholder="2018-10-10 11:00">
+    <input type="submit" value="OK">
+    </form>
+{% endblock %}
